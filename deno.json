@@ -1,20 +1,63 @@
 {
-  "name": "@oazmi/python",
-  "version": "0.4.6",
-  "exports": {
-    ".": "./mod.ts",
-    "./ext/pip": "./ext/pip.ts"
-  },
-  "tasks": {
-    "check": "deno task check:mod && deno task check:ext && deno task check:examples",
-    "check:mod": "deno check mod.ts",
-    "check:ext": "deno check ext/*.ts",
-    "check:examples": "deno check examples/*.ts",
-    "test": "deno test -A test/test.ts && deno test -A --v8-flags=--expose-gc test/test_with_gc.ts",
-    "example:hello_python": "deno run -A examples/hello_python.ts",
-    "example:matplotlib": "deno run -A examples/matplotlib.ts",
-    "example:pip_import": "deno run -A examples/pip_import.ts",
-    "example:run_code": "deno run -A examples/run_code.ts",
-    "example:tensorflow": "deno run -A examples/tensorflow.ts"
-  }
+	"name": "@oazmi/python",
+	"version": "0.4.6",
+	"description": "fork of `@denosaurs/python` that lets you interact with a python interpreter through deno.",
+	"author": "Omar Azmi",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/oazmi/deno_python.git"
+	},
+	"bugs": {
+		"url": "https://github.com/oazmi/deno_python/issues"
+	},
+	"exclude": [
+		"./dist/",
+		"./docs/",
+		"./npm/"
+	],
+	"exports": {
+		".": "./mod.ts",
+		"./ext/pip": "./ext/pip.ts"
+	},
+	"imports": {
+		"@oazmi/kitchensink": "jsr:@oazmi/kitchensink@0.10.1"
+	},
+	"minimumDependencyAge": "0",
+	"nodeModulesDir": "none",
+	"publish": {
+		"exclude": [
+			"./.devcontainer/",
+			"./.github/",
+			"./.vscode/",
+			"./examples/",
+			"./test/",
+			"./clean.ts"
+		]
+	},
+	"test": { "include": ["./test/", "./src/"] },
+	"fmt": {
+		"useTabs": true,
+		"semiColons": false,
+		"singleQuote": false,
+		"lineWidth": 800,
+		"proseWrap": "preserve",
+		"include": ["./src/", "./ext/", "./examples/", "./test/", "**/*.md", "**/*.json", "**/*.yml"]
+	},
+	"compilerOptions": {
+		"lib": ["esnext", "dom", "deno.ns"],
+		"strict": true
+	},
+	"tasks": {
+		"check": "deno task check:mod && deno task check:ext && deno task check:examples",
+		"check:mod": "deno check mod.ts",
+		"check:ext": "deno check ext/*.ts",
+		"check:examples": "deno check examples/*.ts",
+		"test": "deno test -A test/test.ts && deno test -A --v8-flags=--expose-gc test/test_with_gc.ts",
+		"example:hello_python": "deno run -A examples/hello_python.ts",
+		"example:matplotlib": "deno run -A examples/matplotlib.ts",
+		"example:pip_import": "deno run -A examples/pip_import.ts",
+		"example:run_code": "deno run -A examples/run_code.ts",
+		"example:tensorflow": "deno run -A examples/tensorflow.ts"
+	}
 }

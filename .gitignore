@@ -1,7 +1,20 @@
-.vscode/
-/*.bat
-deno.lock
-plug/
-bun.lockb
+# distribution builds and documentation builds
+/dist/
+/docs/
+/npm/
+/temp/
+/package.json
+/tsconfig.json
+
+# cache files and directories
 node_modules/
 __pycache__/
+.deno/
+
+# version lock files
+deno.lock
+deno.d.ts
+package-lock.json
+
+# test artifacts
+/test/**/dist/
