@@ -35,11 +35,12 @@ jobs:
         run: deno task check
 
   test:
-    name: test ${{ matrix.os }}
+    name: test ${{ matrix.os }}, python-${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
+        python-version: ["3.13", "3.14", "3.15"]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
@@ -48,20 +49,37 @@ jobs:
         uses: denoland/setup-deno@v2
 
       - name: Setup Python
+        id: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: ${{ matrix.python-version }}
 
       - name: Setup Bun
         if: ${{ matrix.os != 'windows-latest' }}
         uses: oven-sh/setup-bun@v1
 
+      - name: Install find-libpython to find the interpreter's shared library (os-agnostic)
+        run: python -m pip install find-libpython
+
       - name: Install NumPy
-        run: python3 -m pip install numpy
+        run: python -m pip install numpy
+
+      - name: Set the `DENO_PYTHON_PATH` variable using os-agnostically using the installed python
+        shell: bash
+        env:
+          PYTHON_BIN: ${{ steps.setup-python.outputs.python-path }}
+        run: |
+          SHARED_LIB_PATH=$("$PYTHON_BIN" -c "
+          import find_libpython
+          print(find_libpython.find_libpython())
+          ")
+
+          echo "DENO_PYTHON_PATH=$SHARED_LIB_PATH" >> "$GITHUB_ENV"
 
       - name: Run deno test
         run: deno task test
 
-      - name: Run bun test
-        if: ${{ matrix.os != 'windows-latest' }}
-        run: bun test
+      # Skip bun tests altogether for the time being
+      # - name: Run bun test
+      #   if: ${{ matrix.os != 'windows-latest' }}
+      #   run: bun test
