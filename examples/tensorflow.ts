@@ -1,6 +1,6 @@
-import { python } from "../mod.ts";
+import { python } from "../mod.ts"
 
-const { print } = python.builtins;
-const tf = python.import("tensorflow");
+const { print } = python.builtins
+const tf = python.import("tensorflow")
 
-print("TensorFlow version:", tf.__version__);
+print("TensorFlow version:", tf.__version__)

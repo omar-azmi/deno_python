@@ -20,16 +20,16 @@ simply using the existing python installation.
 Import any locally installed Python package, for example, `matplotlib`:
 
 ```ts
-import { python } from "https://deno.land/x/python/mod.ts";
+import { python } from "https://deno.land/x/python/mod.ts"
 
-const np = python.import("numpy");
-const plt = python.import("matplotlib.pyplot");
+const np = python.import("numpy")
+const plt = python.import("matplotlib.pyplot")
 
-const xpoints = np.array([1, 8]);
-const ypoints = np.array([3, 10]);
+const xpoints = np.array([1, 8])
+const ypoints = np.array([3, 10])
 
-plt.plot(xpoints, ypoints);
-plt.show();
+plt.plot(xpoints, ypoints)
+plt.show()
 ```
 
 When running, you **must** specify `--allow-ffi`, `--allow-env` and
@@ -46,16 +46,16 @@ deno run -A --unstable-ffi <file>
 You can import from the `bunpy` NPM package to use this module in Bun.
 
 ```ts
-import { python } from "bunpy";
+import { python } from "bunpy"
 
-const np = python.import("numpy");
-const plt = python.import("matplotlib.pyplot");
+const np = python.import("numpy")
+const plt = python.import("matplotlib.pyplot")
 
-const xpoints = np.array([1, 8]);
-const ypoints = np.array([3, 10]);
+const xpoints = np.array([1, 8])
+const ypoints = np.array([3, 10])
 
-plt.plot(xpoints, ypoints);
-plt.show();
+plt.plot(xpoints, ypoints)
+plt.show()
 ```
 
 ### Dependencies
@@ -83,16 +83,16 @@ the provided `import` or `install` methods. The rest is handled automatically
 for you! Just take a look!
 
 ```ts
-import { pip } from "https://deno.land/x/python/ext/pip.ts";
+import { pip } from "https://deno.land/x/python/ext/pip.ts"
 
-const np = await pip.import("numpy");
-const plt = await pip.import("matplotlib", "matplotlib.pyplot");
+const np = await pip.import("numpy")
+const plt = await pip.import("matplotlib", "matplotlib.pyplot")
 
-const xpoints = np.array([1, 8]);
-const ypoints = np.array([3, 10]);
+const xpoints = np.array([1, 8])
+const ypoints = np.array([3, 10])
 
-plt.plot(xpoints, ypoints);
-plt.show();
+plt.plot(xpoints, ypoints)
+plt.show()
 ```
 
 ## Documentation

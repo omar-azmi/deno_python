@@ -1,68 +1,64 @@
-import { SYMBOLS } from "./symbols.ts";
-import { postSetup } from "./util.ts";
+import { SYMBOLS } from "./symbols.ts"
+import { postSetup } from "./util.ts"
 
-const searchPath: string[] = [];
 
 const SUPPORTED_VERSIONS = [
-  [3, 15],
-  [3, 14],
-  [3, 13],
-  [3, 12],
-  [3, 11],
-  [3, 10],
-  [3, 9],
-  [3, 8],
-];
-const DENO_PYTHON_PATH = Deno.env.get("DENO_PYTHON_PATH");
+	[3, 15],
+	[3, 14],
+	[3, 13],
+	[3, 12],
+	[3, 11],
+	[3, 10],
+	[3, 9],
+	[3, 8],
+]
+
+const
+	searchPath: string[] = [],
+	DENO_PYTHON_PATH = Deno.env.get("DENO_PYTHON_PATH")
 
 if (DENO_PYTHON_PATH) {
-  searchPath.push(DENO_PYTHON_PATH);
+	searchPath.push(DENO_PYTHON_PATH)
 } else {
-  if (
-    Deno.build.os === "windows" || Deno.build.os === "linux" ||
-    // @ts-ignore: users reported that `windows_nt` exists at runtime
-    Deno.build.os === "windows_nt"
-  ) {
-    searchPath.push(
-      ...SUPPORTED_VERSIONS.map(([major, minor]) =>
-        `${Deno.build.os === "linux" ? "lib" : ""}python${major}${
-          Deno.build.os === "linux" ? "." : ""
-        }${minor}.${Deno.build.os === "linux" ? "so" : "dll"}`
-      ),
-    );
-  } else if (Deno.build.os === "darwin") {
-    for (
-      const framework of [
-        "/Library/Frameworks/Python.framework/Versions",
-        "/opt/homebrew/Frameworks/Python.framework/Versions",
-        "/usr/local/Frameworks/Python.framework/Versions",
-      ]
-    ) {
-      for (const [major, minor] of SUPPORTED_VERSIONS) {
-        searchPath.push(`${framework}/${major}.${minor}/Python`);
-      }
-    }
-  } else {
-    throw new Error(`Unsupported OS: ${Deno.build.os}`);
-  }
+	if (
+		Deno.build.os === "windows" || Deno.build.os === "linux" ||
+		// @ts-ignore: users reported that `windows_nt` exists at runtime
+		Deno.build.os === "windows_nt"
+	) {
+		searchPath.push(
+			...SUPPORTED_VERSIONS.map(([major, minor]) => `${Deno.build.os === "linux" ? "lib" : ""}python${major}${Deno.build.os === "linux" ? "." : ""}${minor}.${Deno.build.os === "linux" ? "so" : "dll"}`),
+		)
+	} else if (Deno.build.os === "darwin") {
+		for (
+			const framework of [
+				"/Library/Frameworks/Python.framework/Versions",
+				"/opt/homebrew/Frameworks/Python.framework/Versions",
+				"/usr/local/Frameworks/Python.framework/Versions",
+			]
+		) {
+			for (const [major, minor] of SUPPORTED_VERSIONS) {
+				searchPath.push(`${framework}/${major}.${minor}/Python`)
+			}
+		}
+	} else { throw new Error(`Unsupported OS: ${Deno.build.os}`) }
 }
 
-let py!: Deno.DynamicLibrary<typeof SYMBOLS>["symbols"];
+let py!: Deno.DynamicLibrary<typeof SYMBOLS>["symbols"]
 
 for (const path of searchPath) {
-  try {
-    py = Deno.dlopen(path, SYMBOLS).symbols;
-    postSetup(path);
-    break;
-  } catch (err) {
-    if (err instanceof TypeError && !("Bun" in globalThis)) {
-      throw new Error(
-        "Cannot load dynamic library because --unstable-ffi flag was not set",
-        { cause: err },
-      );
-    }
-    continue;
-  }
+	try {
+		py = Deno.dlopen(path, SYMBOLS).symbols
+		postSetup(path)
+		break
+	} catch (err) {
+		if (err instanceof TypeError && !("Bun" in globalThis)) {
+			throw new Error(
+				"Cannot load dynamic library because --unstable-ffi flag was not set",
+				{ cause: err },
+			)
+		}
+		continue
+	}
 }
 
 const LIBRARY_NOT_FOUND = new Error(`
@@ -81,10 +77,10 @@ you can open an issue: https://github.com/denosaurs/deno_python/issues
 However, if your Python distribution is not in search
 path, you can set DENO_PYTHON_PATH env variable pointing
 to dll/dylib/so file for Python library.
-`);
+`)
 
 if (typeof py !== "object") {
-  throw LIBRARY_NOT_FOUND;
+	throw LIBRARY_NOT_FOUND
 }
 
-export { py };
+export { py }

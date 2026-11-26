@@ -1,10 +1,10 @@
-import { python } from "../mod.ts";
+import { python } from "../mod.ts"
 
-const np = python.import("numpy");
-const plt = python.import("matplotlib.pyplot");
+const
+	np = python.import("numpy"),
+	plt = python.import("matplotlib.pyplot"),
+	xpoints = np.array([1, 8]),
+	ypoints = np.array([3, 10])
 
-const xpoints = np.array([1, 8]);
-const ypoints = np.array([3, 10]);
-
-plt.plot(xpoints, ypoints);
-plt.show();
+plt.plot(xpoints, ypoints)
+plt.show()

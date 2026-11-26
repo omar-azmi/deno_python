@@ -1,15 +1,16 @@
-import { python } from "../mod.ts";
-import { bench, run } from "mitata";
+import { bench, run } from "mitata"
+import { python } from "../mod.ts"
+
 
 const { add } = python.runModule(`
 def add(a, b):
-  return a + b
-`);
+	return a + b
+`)
 
-bench("noop", () => {});
+bench("noop", () => { })
 
 bench("python.add", () => {
-  add(1, 2);
-});
+	add(1, 2)
+})
 
-await run();
+await run()

@@ -1,7 +1,8 @@
-import { python } from "../mod.ts";
+import { python } from "../mod.ts"
 
-const { print, str } = python.builtins;
-const { version } = python.import("sys");
+const
+	{ print, str } = python.builtins,
+	{ version } = python.import("sys")
 
-print(str("Hello, World!").lower());
-print("Python version:", version);
+print(str("Hello, World!").lower())
+print("Python version:", version)
