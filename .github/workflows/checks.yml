@@ -1,8 +1,7 @@
 name: check
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
   pull_request:
     branches: [main]
 
@@ -64,7 +63,7 @@ jobs:
       - name: Install NumPy
         run: python -m pip install numpy
 
-      - name: Set the `DENO_PYTHON_PATH` variable using os-agnostically using the installed python
+      - name: Set the `DENO_PYTHON_PATH` variable os-agnostically using the installed python
         shell: bash
         env:
           PYTHON_BIN: ${{ steps.setup-python.outputs.python-path }}
@@ -78,8 +77,3 @@ jobs:
 
       - name: Run deno test
         run: deno task test
-
-      # Skip bun tests altogether for the time being
-      # - name: Run bun test
-      #   if: ${{ matrix.os != 'windows-latest' }}
-      #   run: bun test

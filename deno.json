@@ -1,5 +1,5 @@
 {
-  "name": "@denosaurs/python",
+  "name": "@oazmi/python",
   "version": "0.4.6",
   "exports": {
     ".": "./mod.ts",
