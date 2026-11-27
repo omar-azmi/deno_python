@@ -1,3 +1,5 @@
-export * from "./src/python.ts"
-export { python as default } from "./src/python.ts"
+/** fork of `@denosaurs/python` that lets you interact with a python interpreter through deno. */
+
+export * from "./python.ts"
+export { python as default } from "./python.ts"
 

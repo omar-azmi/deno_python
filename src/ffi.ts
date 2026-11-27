@@ -53,12 +53,9 @@ for (const path of searchPath) {
 		py = Deno.dlopen(path, SYMBOLS).symbols
 		promoteDynamicLib(path)
 		break
-	} catch (err) {
-		if (err instanceof TypeError && !("Bun" in globalThis)) {
-			throw new Error(
-				"Cannot load dynamic library because --unstable-ffi flag was not set",
-				{ cause: err },
-			)
+	} catch (error) {
+		if (error instanceof Deno.errors.NotCapable) {
+			throw new Error("cannot load dynamic library because --allow-ffi flag was not set", { cause: error })
 		}
 		continue
 	}
