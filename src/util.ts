@@ -1,54 +1,67 @@
-export const
-	encoder = new TextEncoder(),
-	decoder = new TextDecoder()
+/** this submodule contains utility functions.
+ *
+ * @module
+*/
 
-const libDlDef = {
+import { currentOs, textEncoder } from "./deps.ts"
+
+
+const libdl_def = {
 	dlopen: {
 		parameters: ["buffer", "i32"],
 		result: "pointer",
 	},
 } as const
 
-/** On Unix based systems, we need to supply dlopen with RTLD_GLOBAL
- * but Deno.dlopen does not support passing that flag. So we'll open
- * libc and use its dlopen to open with RTLD_LAZY | RTLD_GLOBAL to
- * allow subsequently loaded shared libraries to be able to use symbols
- * from Python C API.
-*/
-export function postSetup(lib: string) {
-	let libdl: Deno.DynamicLibrary<typeof libDlDef>
-	if (Deno.build.os === "linux") {
-		const libc = Deno.dlopen(`libc.so.6`, {
-			gnu_get_libc_version: { parameters: [], result: "pointer" },
-		})
-		const ptrView = new Deno.UnsafePointerView(
-			libc.symbols.gnu_get_libc_version()!,
-		)
-		const glibcVersion = parseFloat(ptrView.getCString())
-
-		libdl = Deno.dlopen(
-			// starting with glibc 2.34, libdl is merged into libc
-			glibcVersion >= 2.34 ? `libc.so.6` : `libdl.so.2`,
-			libDlDef,
-		)
-	} else if (Deno.build.os === "darwin") {
-		libdl = Deno.dlopen(`libc.dylib`, libDlDef)
-	} else {
-		return
-	}
-	libdl.symbols.dlopen(cstr(lib), 0x00001 | 0x00100)
-}
-
-/** Encodes a C string.
-*/
-export function cstr(str: string): Uint8Array<ArrayBuffer> {
-	const buf = new Uint8Array(str.length + 1)
-	encoder.encodeInto(str, buf)
-	return buf
-}
-
-/** Regular Expression used to test if a string is a `proper_slice`.
+/** on unix-based systems, we need to supply dlopen with `RTLD_GLOBAL`, but `Deno.dlopen` does not support passing that flag.
  *
- * Based on https://docs.python.org/3/reference/expressions.html#slicings
+ * so we open up libc and use its `dlopen` to promote the {@link lib} with the `RTLD_LAZY | RTLD_GLOBAL` flags,
+ * which would allow subsequently loaded shared libraries (from within {@link lib}) to be able to use symbols from python's c-abi.
+*/
+export const promoteDynamicLib = (lib: string): void => {
+	let
+		libdl: Deno.DynamicLibrary<typeof libdl_def> | undefined = undefined,
+		RTLD_LAZY: number | undefined = undefined,
+		RTLD_GLOBAL: number | undefined = undefined
+
+	switch (currentOs) {
+		case "android":
+		case "linux":
+		case "freebsd":
+		case "openbsd": {
+			const
+				libc = Deno.dlopen("libc.so.6", {
+					gnu_get_libc_version: { parameters: [], result: "pointer" },
+				}),
+				ptr_view = new Deno.UnsafePointerView(libc.symbols.gnu_get_libc_version()!),
+				glibc_version = parseFloat(ptr_view.getCString()),
+				// starting with `glibc v2.34`, `libdl` is merged into `libc`.
+				libdl_path = glibc_version >= 2.34 ? "libc.so.6" : "libdl.so.2"
+			libdl = Deno.dlopen(libdl_path, libdl_def)
+			RTLD_LAZY = 0x0001
+			RTLD_GLOBAL = 0x0100
+			break
+		}
+		case "darwin": {
+			libdl = Deno.dlopen("libc.dylib", libdl_def)
+			RTLD_LAZY = 0x0001
+			RTLD_GLOBAL = 0x0008
+			break
+		}
+		default: {
+			break
+		}
+	}
+
+	libdl?.symbols.dlopen(cstr(lib), RTLD_LAZY! | RTLD_GLOBAL!)
+}
+
+/** encodes a string into a utf-8 compatible c-string. */
+export const cstr = (str: string): Uint8Array<ArrayBuffer> => {
+	return textEncoder.encode(str + "\x00")
+}
+
+/** regular expression that tests if a string is a _proper python slice_;
+ * based on: [docs.python.org](https://docs.python.org/3/reference/expressions.html#slicings)
 */
 export const SliceItemRegExp = /^\s*(-?\d+)?\s*:\s*(-?\d+)?\s*(:\s*(-?\d+)?\s*)?$/

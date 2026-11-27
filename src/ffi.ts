@@ -1,5 +1,11 @@
+/** this submodule loads the python dynamic library.
+ *
+ * @module
+*/
+
+import { currentOs } from "./deps.ts"
 import { SYMBOLS } from "./symbols.ts"
-import { postSetup } from "./util.ts"
+import { promoteDynamicLib } from "./util.ts"
 
 
 const SUPPORTED_VERSIONS = [
@@ -20,15 +26,12 @@ const
 if (DENO_PYTHON_PATH) {
 	searchPath.push(DENO_PYTHON_PATH)
 } else {
-	if (
-		Deno.build.os === "windows" || Deno.build.os === "linux" ||
-		// @ts-ignore: users reported that `windows_nt` exists at runtime
-		Deno.build.os === "windows_nt"
-	) {
+	if (currentOs === "windows" || currentOs === "linux") {
+		const is_linux = currentOs === "linux"
 		searchPath.push(
-			...SUPPORTED_VERSIONS.map(([major, minor]) => `${Deno.build.os === "linux" ? "lib" : ""}python${major}${Deno.build.os === "linux" ? "." : ""}${minor}.${Deno.build.os === "linux" ? "so" : "dll"}`),
+			...SUPPORTED_VERSIONS.map(([major, minor]) => `${is_linux ? "lib" : ""}python${major}${is_linux ? "." : ""}${minor}.${is_linux ? "so" : "dll"}`),
 		)
-	} else if (Deno.build.os === "darwin") {
+	} else if (currentOs === "darwin") {
 		for (
 			const framework of [
 				"/Library/Frameworks/Python.framework/Versions",
@@ -40,7 +43,7 @@ if (DENO_PYTHON_PATH) {
 				searchPath.push(`${framework}/${major}.${minor}/Python`)
 			}
 		}
-	} else { throw new Error(`Unsupported OS: ${Deno.build.os}`) }
+	} else { throw new Error(`Unsupported OS: ${currentOs}`) }
 }
 
 let py!: Deno.DynamicLibrary<typeof SYMBOLS>["symbols"]
@@ -48,7 +51,7 @@ let py!: Deno.DynamicLibrary<typeof SYMBOLS>["symbols"]
 for (const path of searchPath) {
 	try {
 		py = Deno.dlopen(path, SYMBOLS).symbols
-		postSetup(path)
+		promoteDynamicLib(path)
 		break
 	} catch (err) {
 		if (err instanceof TypeError && !("Bun" in globalThis)) {

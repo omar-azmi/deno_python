@@ -1,5 +1,9 @@
-// deno-lint-ignore-file no-explicit-any no-fallthrough
+/** this submodule defines the {@link python}, which is the meat of this library.
+ *
+ * @module
+*/
 
+import { currentOs } from "./deps.ts"
 import { py } from "./ffi.ts"
 import { cstr, SliceItemRegExp } from "./util.ts"
 
@@ -943,7 +947,7 @@ export class Python {
 
 		sys.argv = [""]
 
-		if (Deno.build.os === "darwin") {
+		if (currentOs === "darwin") {
 			sys.executable = os.path.join(sys.exec_prefix, "bin", "python3")
 		}
 	}
