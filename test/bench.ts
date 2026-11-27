@@ -1,5 +1,5 @@
 import { bench, run } from "mitata"
-import { python } from "../mod.ts"
+import { python } from "../src/mod.ts"
 
 
 const { add } = python.runModule(`

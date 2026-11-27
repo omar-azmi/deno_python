@@ -1,4 +1,4 @@
-import { python } from "../mod.ts"
+import { python } from "../src/mod.ts"
 
 python.run(`
 def fib(n: int) -> int:

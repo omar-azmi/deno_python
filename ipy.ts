@@ -1,4 +1,4 @@
-import py, { type Python } from "./mod.ts"
+import py, { type Python } from "./src/mod.ts"
 import { type Pip, pip } from "./ext/pip.ts"
 
 declare global {
@@ -20,6 +20,6 @@ Object.defineProperty(globalThis, "pip", {
 	configurable: false,
 })
 
-export * from "./mod.ts"
+export * from "./src/mod.ts"
 export * from "./ext/pip.ts"
 export default py

@@ -1,4 +1,4 @@
-import python, { Callback, ProxiedPyObject } from "../mod.ts"
+import python, { Callback, ProxiedPyObject } from "../src/mod.ts"
 import { assertEquals } from "./asserts.ts"
 
 

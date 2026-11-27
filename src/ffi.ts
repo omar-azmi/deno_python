@@ -4,8 +4,8 @@
 */
 
 import { currentOs } from "./deps.ts"
+import { promoteDynamicLib } from "./funcdefs.ts"
 import { SYMBOLS } from "./symbols.ts"
-import { promoteDynamicLib } from "./util.ts"
 
 
 const SUPPORTED_VERSIONS = [

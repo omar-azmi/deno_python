@@ -1,4 +1,4 @@
-import { python } from "../mod.ts"
+import { python } from "../src/mod.ts"
 
 const
 	{ print, str } = python.builtins,

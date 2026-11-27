@@ -1,11 +1,10 @@
-import { kw, NamedArgument, type PyObject, python } from "../mod.ts"
-
+// deno-lint-ignore-file no-import-prefix
+import { kw, NamedArgument, type PyObject, python } from "../src/mod.ts"
 
 import {
 	type Adw1_ as Adw_,
 	DenoGLibEventLoop,
 	type Gtk4_ as Gtk_,
-	// deno-lint-ignore no-import-prefix
 } from "jsr:@sigma/gtk-py@0.7.0"
 
 const gi = python.import("gi")

@@ -1,4 +1,4 @@
-import { kw, NamedArgument, ProxiedPyObject, PyObject, python, type PythonProxy } from "../mod.ts"
+import { kw, NamedArgument, ProxiedPyObject, PyObject, python, type PythonProxy } from "../src/mod.ts"
 import { assert, assertEquals, assertThrows } from "./asserts.ts"
 
 

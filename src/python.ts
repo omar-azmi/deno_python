@@ -5,7 +5,7 @@
 
 import { currentOs } from "./deps.ts"
 import { py } from "./ffi.ts"
-import { cstr, SliceItemRegExp } from "./util.ts"
+import { cstr, SliceItemRegExp } from "./funcdefs.ts"
 
 
 const refregistry = new FinalizationRegistry(py.Py_DecRef)

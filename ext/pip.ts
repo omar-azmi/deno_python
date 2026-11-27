@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-import-prefix
-import { kw, python, PythonError } from "../mod.ts"
+import { kw, python, PythonError } from "../src/mod.ts"
 
 import { ensureCacheLocation } from "jsr:@denosaurs/plug@^1/download"
 import type { CacheLocation } from "jsr:@denosaurs/plug@^1/types"

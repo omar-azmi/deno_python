@@ -17,7 +17,7 @@
 		"./npm/"
 	],
 	"exports": {
-		".": "./mod.ts",
+		".": "./src/mod.ts",
 		"./ext/pip": "./ext/pip.ts"
 	},
 	"imports": {

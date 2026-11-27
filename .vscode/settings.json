@@ -8,6 +8,7 @@
 		"comments": "on",
 		"strings": "on"
 	},
+	"files.autoSave": "afterDelay",
 	"files.trimTrailingWhitespace": true,
 	"files.insertFinalNewline": true,
 	"files.eol": "\r\n",
