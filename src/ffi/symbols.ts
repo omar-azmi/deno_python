@@ -1,9 +1,9 @@
-/** this submodule simply exports puthon's super-stable c-abi definitions in its {@link SYMBOLS} variable.
+/** this submodule simply exports python's super-stable c-abi definitions in its {@link PySymbols} variable.
  *
  * @module
 */
 
-export const SYMBOLS = {
+export const PySymbols = {
 	Py_Initialize: {
 		parameters: [],
 		result: "void",

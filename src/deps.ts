@@ -4,6 +4,8 @@ import { getSystemInfo, identifyCurrentRuntime } from "@oazmi/kitchensink/crosse
 
 
 export { textDecoder, textEncoder } from "@oazmi/kitchensink/eightpack"
+export { ensureFileUrlIsLocalPath } from "@oazmi/kitchensink/pathman"
+export { isNull } from "@oazmi/kitchensink/struct"
 
 const
 	current_runtime = identifyCurrentRuntime(),

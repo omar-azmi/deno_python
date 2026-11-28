@@ -19,6 +19,9 @@ const libdl_def = {
  * which would allow subsequently loaded shared libraries (from within {@link lib}) to be able to use symbols from python's c-abi.
 */
 export const promoteDynamicLib = (lib: string): void => {
+	// TODO: investigate the `RTLD_NOLOAD`, and if it will be needed to ensure that the python dl is not reloaded under any circumstance.
+	// the issue I see there is that when using `RTLD_NOLOAD`, it only matches with the full resolved path of the dl,
+	// and search aliases, like `"python3.15.so"` will fail this; it'll need to be explicit like `"/usr/local/lib/python3.15.so"`.
 	let
 		libdl: Deno.DynamicLibrary<typeof libdl_def> | undefined = undefined,
 		RTLD_LAZY: number | undefined = undefined,
@@ -43,7 +46,7 @@ export const promoteDynamicLib = (lib: string): void => {
 			break
 		}
 		case "darwin": {
-			libdl = Deno.dlopen("libc.dylib", libdl_def)
+			libdl = Deno.dlopen("/usr/lib/libSystem.B.dylib", libdl_def)
 			RTLD_LAZY = 0x0001
 			RTLD_GLOBAL = 0x0008
 			break

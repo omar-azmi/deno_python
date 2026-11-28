@@ -3,6 +3,7 @@
  * @module
 */
 
-export { py } from "./loader.ts"
-export { SYMBOLS } from "./symbols.ts"
+export type * from "./loader.ts"
+export { loadDynamicLibrary, searchPyDynamicLibrary } from "./loader.ts"
+export { PySymbols } from "./symbols.ts"
 

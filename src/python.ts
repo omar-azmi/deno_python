@@ -4,9 +4,11 @@
 */
 
 import { currentOs } from "./deps.ts"
-import { py } from "./ffi/mod.ts"
+import { loadDynamicLibrary } from "./ffi/mod.ts"
 import { cstr, SliceItemRegExp } from "./funcdefs.ts"
 
+
+const py = loadDynamicLibrary().symbols
 
 const refregistry = new FinalizationRegistry(py.Py_DecRef)
 // keep tracks of all callbacks, because JS can incorrectly GC them

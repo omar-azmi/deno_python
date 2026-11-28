@@ -3,12 +3,12 @@
  * @module
 */
 
-import { currentOs } from "../deps.ts"
+import { currentOs, ensureFileUrlIsLocalPath, isNull } from "../deps.ts"
 import { promoteDynamicLib } from "../funcdefs.ts"
-import { SYMBOLS } from "./symbols.ts"
+import { PySymbols } from "./symbols.ts"
 
 
-const SUPPORTED_VERSIONS = [
+const supported_versions: Array<[major: number, minor: number]> = [
 	[3, 15],
 	[3, 14],
 	[3, 13],
@@ -19,68 +19,95 @@ const SUPPORTED_VERSIONS = [
 	[3, 8],
 ]
 
-const
-	searchPath: string[] = [],
-	DENO_PYTHON_PATH = Deno.env.get("DENO_PYTHON_PATH")
+export interface LoadDynamicLibraryConfig<S extends Deno.ForeignLibraryInterface> {
+	/** the python dynamic library (i.e. the `dll` or equivalent file) paths to attempt loading.
+	 *
+	 * leave it `undefined` for auto discovery based on your current OS.
+	 * you can also run the auto discovery function yourself: {@link }.
+	*/
+	paths?: Array<string | URL>
 
-if (DENO_PYTHON_PATH) {
-	searchPath.push(DENO_PYTHON_PATH)
-} else {
-	if (currentOs === "windows" || currentOs === "linux") {
-		const is_linux = currentOs === "linux"
-		searchPath.push(
-			...SUPPORTED_VERSIONS.map(([major, minor]) => `${is_linux ? "lib" : ""}python${major}${is_linux ? "." : ""}${minor}.${is_linux ? "so" : "dll"}`),
-		)
-	} else if (currentOs === "darwin") {
-		for (
-			const framework of [
-				"/Library/Frameworks/Python.framework/Versions",
-				"/opt/homebrew/Frameworks/Python.framework/Versions",
-				"/usr/local/Frameworks/Python.framework/Versions",
-			]
-		) {
-			for (const [major, minor] of SUPPORTED_VERSIONS) {
-				searchPath.push(`${framework}/${major}.${minor}/Python`)
-			}
-		}
-	} else { throw new Error(`Unsupported OS: ${currentOs}`) }
+	/** the python c-abi symbols to use for the ffi.
+	 *
+	 * @defaultValue {@link PySymbols}.
+	*/
+	symbols?: S
 }
 
-let py!: Deno.DynamicLibrary<typeof SYMBOLS>["symbols"]
-
-for (const path of searchPath) {
-	try {
-		py = Deno.dlopen(path, SYMBOLS).symbols
-		promoteDynamicLib(path)
-		break
-	} catch (error) {
-		if (error instanceof Deno.errors.NotCapable) {
-			throw new Error("cannot load dynamic library because --allow-ffi flag was not set", { cause: error })
+export const loadDynamicLibrary = <
+	const S extends Deno.ForeignLibraryInterface = typeof PySymbols,
+>(config?: LoadDynamicLibraryConfig<S>): Deno.DynamicLibrary<S> => {
+	const { paths, symbols } = { ...defaultLoadDynamicLibraryConfig, ...config }
+	let
+		dl_path: string | URL,
+		dl: Deno.DynamicLibrary<S> | undefined = undefined
+	for (dl_path of paths) {
+		try { dl = Deno.dlopen<S>(dl_path, symbols as S) }
+		catch (error) {
+			if (error instanceof Deno.errors.NotCapable) {
+				throw new Error("[loadDynamicLibrary]: cannot load dynamic library because --allow-ffi flag was not set.", { cause: error })
+			}
+			// when the dynamic library is not found, a generic `Error` class instance is thrown, hence we move to the next search path.
+			continue
 		}
-		continue
+		break
+	}
+
+	if (!isNull(dl)) {
+		promoteDynamicLib(ensureFileUrlIsLocalPath(dl_path!))
+		return dl
+	}
+
+	throw new Error(
+		`[loadDynamicLibrary]: could not find the dynamic library!`
+		+ `the loader tried searching for these dynamic library names/paths on your system: [`
+		+ paths.map((path) => `\n\t"${path}"`).join(",") + "\n]"
+	)
+}
+
+export const searchPyDynamicLibrary = (): Array<string> => {
+	switch (currentOs) {
+		case "android":
+		case "linux":
+		case "freebsd":
+		case "openbsd": {
+			const so_names = supported_versions.map(([major, minor]) => {
+				// TODO: I think openbsd uses the `libpython3.x.so.y.z` format for naming, which would either need to be specified directly,
+				// or require the use of `RTLD_LAZY` flag before deno performs its `dlopen` (which we cannot do before finding out which version to load).
+				// in other words, the current order of operations will likely fail for openbsd platforms, but who am I to care.
+				return `libpython${major}.${minor}.so`
+			})
+			so_names.push("libpython3.so")
+			return so_names
+		}
+		case "windows": {
+			const dll_names = supported_versions.map(([major, minor]) => {
+				return `python${major}${minor}.dll`
+			})
+			dll_names.push("python3.dll")
+			return dll_names
+		}
+		case "darwin": {
+			const search_dirs: Array<(major: number, minor: number) => string> = [
+				(major, minor) => `/Library/Frameworks/Python.framework/Versions/${major}.${minor}/Python`,
+				(major, minor) => `/Library/Frameworks/Python.framework/Versions/${major}.${minor}/lib/libpython${major}.${minor}.dylib`,
+				(major, minor) => `/opt/homebrew/opt/python@${major}.${minor}/Frameworks/Python.framework/Versions/${major}.${minor}/Python`,
+				(major, minor) => `/opt/homebrew/lib/libpython${major}.${minor}.dylib`,
+				(major, minor) => `/usr/local/opt/python@${major}.${minor}/Frameworks/Python.framework/Versions/${major}.${minor}/Python`,
+				(major, minor) => `/usr/local/lib/libpython${major}.${minor}.dylib`,
+			]
+			const dylib_paths = supported_versions.flatMap(([major, minor]) => {
+				return search_dirs.map((search_path) => search_path(major, minor))
+			})
+			return dylib_paths
+		}
+		default: {
+			throw new Error(`[searchPyDynamicLibrary]: detected an unsupported OS: "${currentOs}".`)
+		}
 	}
 }
 
-const LIBRARY_NOT_FOUND = new Error(`
-Could not find Python library!
-
-Tried searching for these versions:
-${searchPath.map((e) => "  " + e).join("\n")}
-
-Make sure you have a supported version of Python
-installed on your system, which should be one of
-these: ${SUPPORTED_VERSIONS.map((e) => `${e[0]}.${e[1]}`).join(", ")}
-
-If the module still somehow fails to find it,
-you can open an issue: https://github.com/denosaurs/deno_python/issues
-
-However, if your Python distribution is not in search
-path, you can set DENO_PYTHON_PATH env variable pointing
-to dll/dylib/so file for Python library.
-`)
-
-if (typeof py !== "object") {
-	throw LIBRARY_NOT_FOUND
+const defaultLoadDynamicLibraryConfig: Required<LoadDynamicLibraryConfig<typeof PySymbols>> = {
+	paths: searchPyDynamicLibrary(),
+	symbols: PySymbols,
 }
-
-export { py }
