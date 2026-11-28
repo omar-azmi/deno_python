@@ -3,8 +3,8 @@
  * @module
 */
 
-import { currentOs } from "./deps.ts"
-import { promoteDynamicLib } from "./funcdefs.ts"
+import { currentOs } from "../deps.ts"
+import { promoteDynamicLib } from "../funcdefs.ts"
 import { SYMBOLS } from "./symbols.ts"
 
 

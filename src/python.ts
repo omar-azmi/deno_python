@@ -4,7 +4,7 @@
 */
 
 import { currentOs } from "./deps.ts"
-import { py } from "./ffi.ts"
+import { py } from "./ffi/mod.ts"
 import { cstr, SliceItemRegExp } from "./funcdefs.ts"
 
 

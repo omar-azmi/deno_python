@@ -18,6 +18,7 @@
 	],
 	"exports": {
 		".": "./src/mod.ts",
+		"./ffi": "./src/ffi/mod.ts",
 		"./ext/pip": "./ext/pip.ts"
 	},
 	"imports": {
@@ -50,14 +51,14 @@
 	},
 	"tasks": {
 		"check": "deno task check:mod && deno task check:ext && deno task check:examples",
-		"check:mod": "deno check mod.ts",
-		"check:ext": "deno check ext/*.ts",
-		"check:examples": "deno check examples/*.ts",
-		"test": "deno test -A test/test.ts && deno test -A --v8-flags=--expose-gc test/test_with_gc.ts",
-		"example:hello_python": "deno run -A examples/hello_python.ts",
-		"example:matplotlib": "deno run -A examples/matplotlib.ts",
-		"example:pip_import": "deno run -A examples/pip_import.ts",
-		"example:run_code": "deno run -A examples/run_code.ts",
-		"example:tensorflow": "deno run -A examples/tensorflow.ts"
+		"check:mod": "deno check ./src/mod.ts",
+		"check:ext": "deno check ./ext/*.ts",
+		"check:examples": "deno check ./examples/*.ts",
+		"test": "deno test -A ./test/test.ts && deno test -A --v8-flags=--expose-gc ./test/test_with_gc.ts",
+		"example:hello_python": "deno run -A ./examples/hello_python.ts",
+		"example:matplotlib": "deno run -A ./examples/matplotlib.ts",
+		"example:pip_import": "deno run -A ./examples/pip_import.ts",
+		"example:run_code": "deno run -A ./examples/run_code.ts",
+		"example:tensorflow": "deno run -A ./examples/tensorflow.ts"
 	}
 }
